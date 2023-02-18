@@ -26,19 +26,20 @@ def main():
 
     # Window Settings
     root_window.title('Application Title')
-    root_window.geometry('1900x1080')
+    root_window.geometry('1900x1000')
     root_window.configure(background = '#353535')
     #create 12 categories
 
 
 
-    canvas = tk.Canvas(root_window, height=700, width=700, bg='#fefefe')
+    canvas = tk.Canvas(root_window, height=800, width=1400, bg='#fefefe')
     canvas.pack(side=tk.TOP)
-    center = (int(canvas.cget("width"))/2,int(canvas.cget("height"))/2)
+    width, height = int(canvas.cget("width")), int(canvas.cget("height"))
+    center = (width/2,height/2)
 
-    config = {'radius':200, 'center':center}
-    en = BaseEngine(90,categories,{'radius':200, 'center':center},canvas)
-    en.speed(1)
+    config = {'radius':height/2.5, 'center':center}
+    en = BaseEngine(200,categories,config,canvas)
+    en.speed(12)
     #create a circle with 200 radius
     canvas.create_oval(center[0]-config["radius"],center[1]-config["radius"],center[0]+config["radius"],center[1]+config["radius"])
     
@@ -57,4 +58,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
