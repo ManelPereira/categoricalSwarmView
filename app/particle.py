@@ -65,4 +65,8 @@ class BaseParticle:
         self.canvas.itemconfig(self.item, fill=color, outline=color)
         self._color = color
 
+    def __str__(self):
+        return f"Particle at ({self.x:.2f},{self.y:.2f}), speed: ({self.speed:.2f})"
+        #text=f"part {i}: ({p.x:.2f},{p.y:.2f}) speed: ({p.speed_x:.2f},{p.speed_y:.2f}) acc: ({p.acc_x:.2f},{p.acc_y:.2f})", 
+
     color = property(lambda self: self._color,_set_color,None,"Gets and sets color")

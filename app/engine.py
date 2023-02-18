@@ -3,12 +3,13 @@ from category import BaseCategory
 from particle import BaseParticle
 import numpy as np
 class BaseEngine:
-    def __init__(self,num_particles,classes,config, canvas):
+    def __init__(self,num_particles,classes,config, canvas,debug=True):
         self.hours = 0
-        self.minutes = 0
+        self.minutes = -5
         self.canvas = canvas
         self.config = self.set_config(config)
         self.particle_count = num_particles
+        self.debug=debug
         self.particles = self._create_particles()
         self.categories = self.create_categories(classes)
         self.new_hours = True
@@ -26,7 +27,15 @@ class BaseEngine:
 
     def _create_particles(self):
         canvas = self.canvas
-        return [BaseParticle(self.config["center"],"red",3,canvas) for _ in range(self.particle_count)]
+        particles = [BaseParticle(self.config["center"],"red",3,canvas) for _ in range(self.particle_count)]
+        if(self.debug):
+            y= 100
+            self.particles_text = [self.canvas.create_text(50, y+15*i, anchor="nw", 
+                        text=f"{p}", 
+                        font=("Purisa", 10)) for i, p in enumerate(particles)]
+            #self.particles_text = [self.canvas.create_text(50,y+10*i,anchor="nw",text=f"part {i}: ({p.x:.2f},{p.y:.2f}) speed: ({p.speed_x:.2f,p.speed_y:.2f}) acc: ({p.acc_x:.2f},{p.acc_x:.2f})",font=("Purisa", 12)) for i,p in enumerate(particles)]
+        return particles
+        
 
     def speed(self, speed):
         for particle in self.particles:
@@ -49,6 +58,11 @@ class BaseEngine:
         for category in self.categories:
             category.sim_category = sum([p.category == category for p in self.particles])/len(self.particles)
 
+    def draw_particle_debug(self):
+        if(self.debug):
+            for i,p in enumerate(self.particles):
+                self.canvas.itemconfig(self.particles_text[i],text=f"{p}")
+
 
     def draw_hours(self):
         self.canvas.itemconfig(self.timeid,text=f"{int(self.hours)} hours")
@@ -58,6 +72,7 @@ class BaseEngine:
         if(self.minutes%120 == 0):
             self.calculate_probability()
 
+        self.draw_particle_debug()
         self.draw_hours()
         self.handle_colisions()
         for particle in self.particles:
