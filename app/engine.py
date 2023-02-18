@@ -4,13 +4,15 @@ from particle import BaseParticle
 import numpy as np
 class BaseEngine:
     def __init__(self,num_particles,classes,config, canvas):
-
+        self.hours = 0
+        self.minutes = 0
         self.canvas = canvas
         self.config = self.set_config(config)
         self.particle_count = num_particles
         self.particles = self._create_particles()
         self.categories = self.create_categories(classes)
         self.new_hours = True
+        self.timeid = self.canvas.create_text(50,50,anchor="nw",text=f"{int(self.hours)} hours",font=("Purisa", 14))
     def set_canvas(self,canvas):
         self.canvas = canvas
 
@@ -30,8 +32,14 @@ class BaseEngine:
         for particle in self.particles:
             particle.speed = speed
 
+    def probability_generator(self,num_classes):
+        probabilities = np.random.random(num_classes)
+        probabilities /= probabilities.sum()
+        return probabilities
+
     def calculate_probability(self):
-        probabilities = np.array([category.probability for category in self.categories])
+        
+        probabilities = self.probability_generator(len(self.categories))
         probabilities /= probabilities.sum()
         for particle in self.particles:
             category = np.random.choice(self.categories,p=probabilities)
@@ -42,19 +50,23 @@ class BaseEngine:
             category.sim_category = sum([p.category == category for p in self.particles])/len(self.particles)
 
 
-    
+    def draw_hours(self):
+        self.canvas.itemconfig(self.timeid,text=f"{int(self.hours)} hours")
     def update(self):
-        self.handle_colisions()
-        if self.new_hours:
-            self.new_hours = False
+        self.hours += 1/120
+        self.minutes += 1
+        if(self.minutes%120 == 0):
             self.calculate_probability()
+
+        self.draw_hours()
+        self.handle_colisions()
         for particle in self.particles:
             particle.update()
             particle.draw()
         for category in self.categories:
             category.draw()
         
-        self.canvas.after(1, self.update)
+        self.canvas.after(20, self.update)
     
     def handle_colisions(self):
         for p in self.particles:
@@ -77,10 +89,11 @@ class BaseEngine:
         for i, (name,cat) in enumerate(categories.items()):
             current_angle = angle * i
             centerx, centery = self.config["center"]
-            x = centerx + self.config["radius"] * math.cos(current_angle)
-            y = centery + self.config["radius"] * math.sin(current_angle)
+            x = centerx + self.config["radius"] * math.cos(math.radians(current_angle))
+            y = centery + self.config["radius"] * math.sin(math.radians(current_angle))
 
             cat = BaseCategory(name,cat,(x,y),canvas,BaseCategory.colors()[i])
+            
             lst_cat.append(cat)
         return lst_cat
         
